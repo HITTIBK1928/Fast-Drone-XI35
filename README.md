@@ -7,6 +7,9 @@ categories:
     - fast-drone
 ---
 
+<img src="images/xi35悬停图2.jpg" width = 32% height = 32% div align=left />
+<img src="images/八架xi35.jpg" width = 34% height = 34% div align=center />
+
 本文介绍了：
 - 152mm 轴距四旋翼无人机（XI35）的组装过程
 - 飞控的参数配置
@@ -14,7 +17,7 @@ categories:
   - 在宿主机上逐步地手动配置环境
   - 使用 Docker 自动配置环境
 - 代码编译与启动流程
-- [] TODO 开发流程
+- [ ] TODO 开发流程
 - 注意事项
 - 开发流程
 
@@ -25,9 +28,18 @@ categories:
 > 若需了解，可阅读本工程的其他文档，以及公开的论文。
 
 本工程实现的功能：
-- 在轴距更小的 XI35 上实现 fast-drone-250 的自主飞行避障功能。
-- 多机通信
+- 在轴距更小的 XI35 上实现 fast-drone-250 的自主飞行避障功能
+<img src="images/avoid.gif" width = 50% height = 50% div align=center />
+  
+- 双机通信协同
+<img src="images/双机通信协同.gif" width = 50% height = 50% div align=center />
+
 - 预设航迹，搜索特定数字标识，正确识别后并降落
+<img src="images/搜索识别降落.gif" width = 40% height = 40% div align=center />
+  
+- 自主跟随墙面飞行
+<img src="images/跟墙飞行成功2长距离6点-2025-01-17-00-16-39_output.gif" width = 50% height = 50% div align=left />
+<img src="images/走廊跟墙第三视角3.gif" width = 50% height = 50% div align=center />
 
 
 ## 目录
@@ -67,7 +79,7 @@ categories:
 
 - 将M3转M2橡胶减震柱穿过电驱和飞控的四角安装孔（技巧：橡皮筋技巧）
 
-- 使用M2*20安装电驱，8pin接口朝机头，接口贴着机架			
+- 使用M2*20安装电驱，8pin接口朝机头，接口贴着机架
 
 - 电机线修修剪（用剥线钳），焊接(加松香)；电源线和滤波电容焊接
 
@@ -115,9 +127,9 @@ categories:
 - 遥控器和接收机对频，并在地面站校准
 
 - 配置通道功能，用于飞行模式切换、紧急停止等（注意：有三档的前两档一致）详见 [px4ctrl](https://gitee.com/jerry-ironman/px4ctrl)
-  - 5通道2档：自稳和offboard 
-  - 6通道3档：是否接受命令 
-  - 7通道3档：急停 
+  - 5通道2档：自稳和offboard
+  - 6通道3档：是否接受命令
+  - 7通道3档：急停
   - 8通道2档：px4ctrl对px4的重启
 
 - 飞控与罗盘方向设置
@@ -137,10 +149,9 @@ categories:
 - MAV_0_FORWARD: Enabled
 - MAV_0_MODE: External Vision
 - MAV_0_RADIO_CTL: Enabled
-- MAV_0_RATE: 92160 B/s
+- MAV_0_RATE: 921600 B/s
 
-
-### 2.3 获得高分辨率和高频率的 IMU 数据所需的配置
+获得高分辨率和高频率的 IMU 数据所需的配置
 
 create file in your tf-card /etc/extras.txt
 
@@ -153,15 +164,12 @@ mavlink stream -d /dev/ttyS3 -s HIGHRES_IMU -r 1000
 then using the following settings:
 - IMU_GYRO_RATEMAX: 2000Hz
 - IMU_INTEG_RATE: 400Hz
-- MAV_0_MODE: External vision
-- Set Uart4(SER_TELE2) to 921600
-- MAV_0_RATE 92160B/s
 
 after these settings you will have 250Hz /imu/data_raw /imu/data
 
 ## 3 ORIN NX 配置
 
-### 3.1 安装 jetpack 5.1.3 linux for jetson orin nx modules: 
+### 3.1 安装 jetpack 5.1.3 linux for jetson orin nx modules:
 
 - 在 PC 上的 ubuntu 里安装 sdkmanager
 
@@ -312,11 +320,11 @@ sudo nmcli connection add type wifi ifname wlan1 con-name HITADHOC mode adhoc ss
 ```shell
 sudo nmcli connection modify HITADHOC ipv4.method manual ipv4.addresses 10.10.10.11/24
 ```
-  
+
 - 通过con-name激活网络配置，激活后会开机自启动
 ```shell
 sudo nmcli connection up HITADHOC
-```  
+```
 
 - 如果后续要删除配置，可以通过con-name删除
 ```shell
@@ -367,7 +375,7 @@ pip install scikit-image
 部分软件库（ceres、glog和cv_bridge）和编译一些软件库所需要的额外的文件（比如编译opencv_contrib需要一些额外文件）打包进一个压缩包3rd_party.zip，放在docker执行的上下文目录，供构建镜像时解压使用。
 构建环境基础镜像，在终端执行：
 ```shell
-make jetson_base 
+make jetson_base
 ```
 
 **具体使用见 4.6**
@@ -377,7 +385,7 @@ make jetson_base
 由于dockerhub在国内无法访问，基础环境镜像暂时没有push到远程仓库，通过docker save打包成.tar文件，借助u盘拷贝至宿主机，再通过docker load解压得到基础环境镜像local/fastdronexi35:orin_base_35.3.1。
 要构建Fast-Drone-XI35镜像，在终端执行:
 ```shell
-make jetson 
+make jetson
 ```
 初始化脚本"container_init.sh"说明：
 初始化脚本也放在构建镜像的上下文目录，构建阶段拷贝至镜像/root目录下，用于执行启动容器时的一些初始化操作，目前的初始化操作比较简单，主要是启动ssh服务，还有一个操作是改变mavros的px4.launch中的参数用于设配实际硬件，这样避免了重新构建基础镜像。
@@ -476,6 +484,90 @@ sudo docker exec -it  fd_runtime bash
 
 ## 5 代码编译与启动流程
 
+### 5.1 前置准备
+
+**1.使用网卡局域网连接无人机**
+
+配置网卡
+- 使用Network Manager配置网卡，ifname为待配置的网卡名称，con-name为配置文件名称，ssid为网络名称，wifi.band为频段，wifi.channel为信道(只需更改wlan1为无线网卡)
+
+  ```sudo nmcli connection add type wifi ifname wlan1 con-name HITADHOC mode adhoc ssid HITADHOC wifi.band bg wifi.channel 3```
+
+- 通过con-name修改网络配置，ipv4.addresses为IPv4地址(10.10.10.11中末位的11-19是无人机用的ip，不要重复设置)
+
+  ```sudo nmcli connection modify HITADHOC ipv4.method manual ipv4.addresses 10.10.10.11/24```
+
+- 通过con-name激活网络配置，激活后会开机自启动
+
+  ```sudo nmcli connection up HITADHOC```
+
+- 如果后续要删除配置，可以通过con-name删除
+
+  ```sudo nmcli connection delete HITADHOC```
+
+- 查看已配置的网络连接
+
+  ```sudo nmcli con show```
+
+- 连接无人机
+
+  ```ssh orin04@10.10.10.14```
+
+**2.获取ip地址后使用路由器连接**
+
+- 使用nmcli命令配置wifi连接
+
+  ```sudo nmcli device wifi```
+
+- 查询wifi列表
+
+
+  ```sudo nmcli device wifi list```
+
+- 更改连接wifi(查找不到wifi时重新扫描)
+
+
+  ```sudo nmcli device wifi connect Drone_WiFi password buzhidao```
+
+- 查看ip
+
+  ```ifconfig```
+
+- 使用局域网连接
+
+  ```sh orin04@192.168.3.101```
+
+**3.使用terminator连接**
+
+- 查看隐藏文件和文件夹
+
+  ```ls -a```
+
+- 查找terminator配置文件(.config/terminator目录下)
+
+  ```cd ~/.config/terminator```
+
+
+- 查看当前目录下文件的详细信息，terminator中仅有config文件发挥作用，所以重只需查看config的软路由
+
+  ```ll```
+
+- 默认使用网卡连接，如果需要更改为wifi连接，可以替换原有配置中的本地ip后更改路由
+
+- vim 内的批量替换命令
+
+  ```:%s/10.10.10.11/192.168.3.100/g```
+
+- 更改软路由
+
+  ```sudo ln -sf config-orin01-nodocker config```
+
+- 打开无人机控制系统
+
+  ```terminator -l drone_1```
+
+### 5.2 运行无人机的不同功能
+
 - ssh 连接到 orin 板，如 `ssh orin01@10.10.10.11`
 
 悬停功能：
@@ -511,45 +603,99 @@ sudo docker exec -it  fd_runtime bash
 
 - `sh Fast-Drone-XI35/shfiles/takeoff.sh`
 
-### 机间特异性配置
+### 5.3 调参
 
-- src/realflight_modules/VINS-Fusion-gpu/config/fast_drone_250.yaml: 107L
-```shell
-  odometry_type: 1 #0为原始里程计，1为加了偏置后的里程计
-  drone_id: 2
-  single_offset: 2.0
+一些常用的参数可能需要频繁调整，但参数分布在不同文件里，为了提高修改效率，编写了脚本批量修改参数，无需直接在原文件内修改，只需在 `Fast-Drone-XI35/config_scipt` 目录下修改 `xxx.yaml` 配置文件，文件里已列出一系列参数和值。修改完毕后可执行脚本 读取 和 真正写入 参数：
+
 ```
-- src/auto_search/target_merge/launch/target_merge.launch: 9L
-```xml
-<param name="drone_id" value="2" type="int"/>
+python3 read_global_config.py global_config_indoor.yaml
+python3 set_global_config.py global_config_indoor.yaml
 ```
 
-- src/auto_search/search_plan/launch/search_plan.launch: 4L
-```xml
-    <arg name="point_num" value="1" />
+如需了解有哪些参数需要配置，请阅读 `config_scipt/global_config_indoor.yaml` 文件。大致可分为两类：
+- 机间特异性配置
+- 与飞行场地大小相关的参数配置
 
-    <arg name="point0_x" value="3.5" />
-    <arg name="point0_y" value="-2.0" />
-    <arg name="point0_z" value="0.7" />
-...
-39L
-        <param name="search_startpoint_x" value="1.0" type="double"/>
-        <param name="search_startpoint_y" value="-2.0" type="double"/>
-        <param name="search_startpoint_z" value="0.7" type="double"/>
-```
-
-- .bashrc ROS多机配置
-
-### 与飞行场地大小相关的参数配置
-
-- search_plan 里的到达半径/阈值
-- ego_planner 里的
-    - thresh_no_replan
-    - 规划最大速度
-- px4ctrl 里的飞行最大速度
+pid 的参数需单独在 `Fast-Drone-XI35/src/realflight_modules/px4ctrl/config` 文件内修改。
 
 
 ## 6 开发流程
+### 曲线日志的使用与解析
+在开发过程中，难免有时需要对一个变量随时间的变化情况进行观察，或者对自己打印的某个log在实验结束后进行复盘，基于此开发了如下功能：
+
+- 将ROS自带的文件系统日志记录到代码主目录下的/log文件夹
+
+- 通过在代码中调用ROS日志输出特定格式的键值对来记录“曲线日志”
+
+- 使用/scripts/process_log.py对所有架次的日志进行解析，输出为文本日志和csv曲线日志
+
+下面是具体开发指南：
+
+1. 修改ROS日志在文件系统内的默认位置
+
+ROS的日志在启动时会获取ROS_LOG_DIR环境变量的值，将日志保存在此位置，所以需要在.bashrc添加一个环境变量。
+
+- 在非Docker环境中，需要在~/.bashrc中自行添加环境变量（下面的绝对路径换成自己的代码中log目录位置）。
+
+```
+export ROS_LOG_DIR=/home/zhangrun/code/Fast-Drone-XI35/log
+```
+
+- 在Docker环境中，配置脚本已经添加了加入环境变量的步骤，所以无需操作。
+
+2. 在代码中记录曲线日志
+
+通过键值对[status]:[12.76]的格式调用ROS_INFO或ROS_WARN或ROS_INFO_THROTTLE等进行记录，如：
+
+```
+ROS_INFO("[odom_tx]:[%f] [odom_ty]:[%f] [odom_tz]:[%f], tmp_T.x(), tmp_T.y(), tmp_T.z());
+```
+
+注意只支持英文字母。
+
+3. 日志解析
+
+通过在代码/scripts/process_log.py脚本进行解析处理
+
+```
+python3 scripts/process_log.py
+```
+
+将会有如下输出：
+
+```
+Processing /home/zhangrun/code/Fast-Drone-XI35/scripts/../log/2d61da22-a4b5-11f0-b4af-488f4b616bfc ...
+Done: /home/zhangrun/code/Fast-Drone-XI35/scripts/../log/2025-10-09 10:10:50
+Processing /home/zhangrun/code/Fast-Drone-XI35/scripts/../log/711678c8-a4b4-11f0-9342-488f4b616bfc ...
+Done: /home/zhangrun/code/Fast-Drone-XI35/scripts/../log/2025-10-09 10:05:34
+```
+
+上边参考输出表示将2d61da22-a4b5-11f0-b4af-488f4b616bfc文件夹的日志输出到log/2025-10-09 10:10:50目录下，其中有两种日志：'2025-10-09 10:10:50.csv'  '2025-10-09 10:10:50.log'，分别对应曲线日志和文本日志。
+
+4. 曲线日志的查看
+
+通过ROS的Plotjuggler进行查看.csv格式的曲线日志。亦可以将日志下载到Windows电脑，通过win平台的Plotjuggler进行查看
+
+安装：
+
+```
+sudo apt install ros-noetic-plotjuggler-ros
+```
+
+启动：
+```
+rosrun plotjuggler plotjuggler
+```
+
+导入.csv文件，选定timestamp为X轴后，将想要显示的曲线拖动到右侧表中即可显示。
+
+<p align="center">
+  <img src="images/plotjuggler-1.png" width="90%">
+</p>
+
+<p align="center">
+  <img src="images/plotjuggler-2.png" width="90%">
+</p>
 
 ## 注意事项
 
@@ -557,7 +703,7 @@ sudo docker exec -it  fd_runtime bash
 
 - 安装好后typeC不好插
 
-- 小心滤波电容短路 
+- 小心滤波电容短路
 
 - QGC v4.0.11无法识别 px4 pro 1.14.0
   - QGC 4.3.0 可以识别
@@ -570,7 +716,7 @@ sudo docker exec -it  fd_runtime bash
 - 电机线焊接方向没选择好，导致挤在一起，可能会影响散热
   - ！！！加上电源线没焊好，会挡住飞控上的 TELE2 接口，不得不重新焊接
 
-### orin 相关
+### Orin 相关
 
 - orin载板安装孔是M3，使用M2立柱，导致只能用M2螺丝，螺帽太小会穿过，因此要在螺丝上加两个螺母
 
@@ -609,6 +755,44 @@ sudo docker exec -it  fd_runtime bash
 
 - LCM节点启动后报错：Error while loading shared libraries: liblcm.so.1: cannot open shared object file: No such file or directory
     - [$ sudo ldconfig -v](https://github.com/CogChameleon/ChromaTag/issues/2)
+
+### 调试相关
+
+- 需要先生成公钥，然后执行该命令，之后便不需要再输入密码即可连接
+
+  ```ssh-copy-id orin01@10.10.10.11```
+
+- 命令行连接wifi
+
+```shell
+sudo nmcli device wifi list
+sudo nmcli device wifi connect Drone_WiFi password buzhidao
+```
+
+- vim 内的批量替换命令
+
+  ```%s/10.10.10.11/192.168.3.100/g```
+
+- 更改软路由
+
+  ```sudo ln -sf config-orin01-nodocker config```
+
+- 常用参数修改，如起飞高度
+
+```shell
+/home/orin01/Fast-Drone-XI35/config_scipt
+python3 read_global_config.py global_config_indoor.yaml
+python3 set_global_config.py global_config_indoor.yaml
+```
+
+- pid调参
+
+  ```/home/orin01/Fast-Drone-XI35/src/realflight_modules/px4ctrl/config```
+
+- 打开无人机控制系统
+
+  ```terminator -l drone_1```
+
 
 ## 参考
 
